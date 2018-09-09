@@ -11,9 +11,10 @@ ENV DEBIAN_FRONTEND noninteractive
 ADD lgsm-dependencies.list /tmp/.
 
 ## Base System
-RUN dpkg --add-architecture i386 && \
-	apt-get update -y && \
-	apt-get install -y $(cat /tmp/lgsm-dependencies.list)
+RUN dpkg --add-architecture i386
+RUN	apt-get update -y
+RUN	apt-get install -y $(cat /tmp/lgsm-dependencies.list) 
+RUN apt-get autoremove --purge
 
 ## lgsm.sh
 RUN wget https://linuxgsm.com/dl/linuxgsm.sh
