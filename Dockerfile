@@ -5,16 +5,22 @@
 #
 
 FROM debian:stable-slim
-LABEL maintainer="LinuxGSM <me@Danielgibbs.co.uk>"
+LABEL maintainer="www.arma3.gr"
 
 ENV DEBIAN_FRONTEND noninteractive
-ADD lgsm-dependencies.list /tmp/.
+ENV HOMEVOL /home/lgsm
+
+ARG STEAM-USER
+ARG STEAM-PASS
+
+ADD lgsm-dependencies.list .
 
 ## Base System
-RUN dpkg --add-architecture i386
-RUN	apt-get update -y
-RUN	apt-get install -y $(cat /tmp/lgsm-dependencies.list) 
-RUN apt-get autoremove --purge
+RUN dpkg --add-architecture i386 && \
+	apt-get update -y && \
+	apt-get install -y $(cat lgsm-dependencies.list) && \
+	apt-get autoremove --purge && \
+	rm lgsm-dependencies.list
 
 ## lgsm.sh
 RUN wget https://linuxgsm.com/dl/linuxgsm.sh
@@ -29,15 +35,18 @@ RUN groupadd -g 750 -o lgsm && \
 	chown -R lgsm:lgsm /home/lgsm/ && \
 	chmod 755 /home/lgsm
 
+
 USER lgsm
-WORKDIR /home/lgsm
-VOLUME [ "/home/lgsm" ]
+WORKDIR ${HOMEVOL}
+VOLUME [ "${HOMEVOL}" ]
+
+# Save Steam credentials for later consumption
+RUN touch lgsmsecrets && \
+	echo "steamuser=\"${STEAM-USER}\"" > ${HOMEVOL}/lgsmsecrets && \
+	echo "steampass=\"${STEAM-PASS}\"" >> ${HOMEVOL}/lgsmsecrets
 
 # need use xterm for LinuxGSM
 ENV TERM=xterm
 
 ## Docker Details
 ENV PATH=$PATH:/home/lgsm
-
-COPY entrypoint.sh /entrypoint.sh
-ENTRYPOINT ["bash","/entrypoint.sh" ]

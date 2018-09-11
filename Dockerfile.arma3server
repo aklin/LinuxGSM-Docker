@@ -1,0 +1,20 @@
+FROM hellenicmilsim/baseimage
+
+ARG SERVER-NAME
+ARG PASSWORD
+ARG ADMIN-PASSWORD
+
+USER lgsm
+WORKDIR /home/lgsm
+
+RUN true
+RUN mkdir -p /home/lgsm/lgsm/config-lgsm/arma3server/ && \
+	touch common.cfg && \
+	cat /home/lgsm/lgsmsecrets > /home/lgsm/lgsm/config-lgsm/arma3server/common.cfg
+
+RUN ./linuxgsm.sh arma3server && ./arma3server ai
+
+
+ADD arma3/entrypoint.sh entrypoint.sh
+
+ENTRYPOINT ["bash", "entrypoint.sh"]
